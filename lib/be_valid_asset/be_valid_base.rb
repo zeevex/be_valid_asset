@@ -69,7 +69,21 @@ module BeValidAsset
         check_net_enabled
         boundary = Digest::MD5.hexdigest(Time.now.to_s)
         data = encode_multipart_params(boundary, query_params)
-        return http_start(validator_host).post2(validator_path, data, "Content-type" => "multipart/form-data; boundary=#{boundary}" )
+
+        
+        retry_count = 5
+        catch :done do
+          retry_count.times do |i|
+            begin
+              result = http_start(validator_host).post2(validator_path, data, 
+                                                        "Content-type" => "multipart/form-data; boundary=#{boundary}" )
+              throw :done, result unless [502,503,504].include? result.code.to_i
+              throw :done, result if i == retry_count-1
+              sleep 5
+            end
+          end
+          
+        end
       end
 
       def encode_multipart_params(boundary, params = {})
