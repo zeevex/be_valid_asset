@@ -13,6 +13,7 @@ module BeValidAsset
   
     def initialize(options = {})
       @fragment = options[:fragment]
+      @doctype = options[:doctype] || "xhtml10"
     end
   
     # Assert that markup (html/xhtml) is valid according the W3C validator web service.
@@ -31,7 +32,7 @@ module BeValidAsset
       query_params = { :fragment => fragment }
       if @fragment
         query_params[:prefill] = '1'
-        query_params[:prefill_doctype] = 'xhtml10'
+        query_params[:prefill_doctype] = @doctype
       end
 
       return validate(query_params)
